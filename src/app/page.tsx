@@ -1,9 +1,46 @@
 import React from 'react';
 import { Navbar } from '@/components/Navbar';
-import { ProjectDocuments } from '@/components/ProjectDocuments';
+import { ProjectDocuments, Repository } from '@/components/ProjectDocuments';
 import { appConfig } from '@/config';
 
-export default function Home() {
+// Fetch repositories at build-time on the server
+async function fetchRepositories(): Promise<Repository[]> {
+  try {
+    const headers: Record<string, string> = {
+      Accept: 'application/vnd.github.v3+json',
+    };
+
+    if (appConfig.githubToken) {
+      headers['Authorization'] = `token ${appConfig.githubToken}`;
+    }
+
+    let endpoint = '';
+    if (appConfig.ownerType === 'org') {
+      endpoint = `https://api.github.com/orgs/${appConfig.githubOwner}/repos?per_page=100${appConfig.githubToken ? '&type=all' : ''}`;
+    } else {
+      endpoint = appConfig.githubToken
+        ? `https://api.github.com/user/repos?per_page=100`
+        : `https://api.github.com/users/${appConfig.githubOwner}/repos?per_page=100`;
+    }
+
+    const response = await fetch(endpoint, { headers });
+
+    if (!response.ok) {
+      console.error(`Failed to fetch repositories: Status ${response.status}`);
+      return [];
+    }
+
+    const data: Repository[] = await response.json();
+    return data;
+  } catch (err) {
+    console.error('Error fetching repositories at build time:', err);
+    return [];
+  }
+}
+
+export default async function Home() {
+  const initialRepos = await fetchRepositories();
+
   const githubRepoUrl = `https://github.com/${appConfig.githubOwner}/${appConfig.repoName}`;
   const githubProfileUrl = `https://github.com/${appConfig.githubOwner}`;
 
@@ -235,8 +272,8 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Dynamic Project Documents & SOP Section */}
-        <ProjectDocuments />
+        {/* Project & Documentation Section */}
+        <ProjectDocuments initialRepos={initialRepos} />
       </main>
 
       {/* Footer */}

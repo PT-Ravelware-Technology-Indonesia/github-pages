@@ -35,5 +35,5 @@ export const appConfig: AppConfig = {
   kumaUrl: rawConfig.kumaUrl?.trim() || DEFAULT_CONFIG.kumaUrl,
   portalUrl: rawConfig.portalUrl?.trim() || DEFAULT_CONFIG.portalUrl,
   driveSopUrl: rawConfig.driveSopUrl?.trim() || DEFAULT_CONFIG.driveSopUrl,
-  githubToken: (rawConfig as any).githubToken?.trim() || process.env.NEXT_PUBLIC_GITHUB_TOKEN || process.env.GITHUB_TOKEN || DEFAULT_CONFIG.githubToken,
+  githubToken: process.env.PORTAL_GITHUB_TOKEN || process.env.GITHUB_TOKEN || (rawConfig as any).githubToken?.trim() || DEFAULT_CONFIG.githubToken,
 };

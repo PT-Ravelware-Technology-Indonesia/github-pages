@@ -4,7 +4,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import ReactDOM from 'react-dom';
 import { appConfig } from '@/config';
 
-interface Repository {
+export interface Repository {
   id: number;
   name: string;
   description: string | null;
@@ -35,10 +35,14 @@ const LANGUAGE_COLORS: Record<string, string> = {
   Ruby: '#701516',
 };
 
-export const ProjectDocuments: React.FC = () => {
+interface ProjectDocumentsProps {
+  initialRepos: Repository[];
+}
+
+export const ProjectDocuments: React.FC<ProjectDocumentsProps> = ({ initialRepos }) => {
   const [activeTab, setActiveTab] = useState<'github' | 'drive'>('github');
-  const [repos, setRepos] = useState<Repository[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [repos, setRepos] = useState<Repository[]>(initialRepos);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortMethod, setSortMethod] = useState<'updated' | 'stars' | 'name'>('updated');
@@ -61,10 +65,6 @@ export const ProjectDocuments: React.FC = () => {
       const headers: Record<string, string> = {
         Accept: 'application/vnd.github.v3.html',
       };
-
-      if (appConfig.githubToken) {
-        headers['Authorization'] = `token ${appConfig.githubToken}`;
-      }
 
       const response = await fetch(
         `https://api.github.com/repos/${appConfig.githubOwner}/${repoName}/readme`,
@@ -94,51 +94,7 @@ export const ProjectDocuments: React.FC = () => {
     setReadmeError(null);
   };
 
-  useEffect(() => {
-    const fetchRepos = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        
-        const headers: Record<string, string> = {
-          Accept: 'application/vnd.github.v3+json',
-        };
-
-        if (appConfig.githubToken) {
-          headers['Authorization'] = `token ${appConfig.githubToken}`;
-        }
-
-        // Fetch both public and private repositories if authenticated
-        let endpoint = '';
-        if (appConfig.ownerType === 'org') {
-          endpoint = `https://api.github.com/orgs/${appConfig.githubOwner}/repos?per_page=100${appConfig.githubToken ? '&type=all' : ''}`;
-        } else {
-          endpoint = appConfig.githubToken
-            ? `https://api.github.com/user/repos?per_page=100`
-            : `https://api.github.com/users/${appConfig.githubOwner}/repos?per_page=100`;
-        }
-
-        const response = await fetch(endpoint, { headers });
-
-        if (!response.ok) {
-          if (response.status === 403) {
-            throw new Error('Limit API GitHub tercapai atau autentikasi gagal. Silakan periksa token Anda.');
-          }
-          throw new Error(`Gagal mengambil data repository: Status ${response.status}`);
-        }
-
-        const data: Repository[] = await response.json();
-        setRepos(data);
-      } catch (err: any) {
-        console.error(err);
-        setError(err.message || 'Terjadi kesalahan saat memuat project.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchRepos();
-  }, []);
+  // Removed client-side fetchRepos effect since data is fetched at build time.
 
   // Filter and Sort Repositories
   const filteredRepos = repos
