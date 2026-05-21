@@ -38,7 +38,7 @@ jobs:
           NEXT_PUBLIC_BASE_PATH: /github-pages
           # Token to fetch private repos at build time (stored as a repo Secret)
           # Only used server-side during build; never embedded in the static bundle
-          NEXT_PUBLIC_GITHUB_TOKEN: ${{ secrets.PORTAL_GITHUB_TOKEN }}
+          PORTAL_GITHUB_TOKEN: ${{ secrets.PORTAL_GITHUB_TOKEN }}
 
       - name: Deploy to gh-pages branch
         uses: peaceiris/actions-gh-pages@v4
