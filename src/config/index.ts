@@ -8,16 +8,20 @@ export interface AppConfig {
   projectUrl: string;
   kumaUrl: string;
   portalUrl: string;
+  driveSopUrl: string;
+  githubToken: string;
 }
 
 const DEFAULT_CONFIG: AppConfig = {
-  githubOwner: 'Fyudaz-Apps',
+  githubOwner: 'PT-Ravelware-Technology-Indonesia',
   repoName: 'github-pages',
   ownerType: 'org',
-  departmentName: 'IT Software Development',
+  departmentName: 'Software Development',
   projectUrl: '',
   kumaUrl: 'https://kuma.ravelware.cloud',
-  portalUrl: 'https://Fyudaz-Apps.github.io/github-pages/',
+  portalUrl: 'https://PT-Ravelware-Technology-Indonesia.github.io/github-pages/',
+  driveSopUrl: 'https://drive.google.com/drive/folders/1NuEWMGEEsTCbarTOqAXuZUe1ZWGxRJXz',
+  githubToken: '',
 };
 
 export const appConfig: AppConfig = {
@@ -30,4 +34,6 @@ export const appConfig: AppConfig = {
   projectUrl: rawConfig.projectUrl?.trim() || DEFAULT_CONFIG.projectUrl,
   kumaUrl: rawConfig.kumaUrl?.trim() || DEFAULT_CONFIG.kumaUrl,
   portalUrl: rawConfig.portalUrl?.trim() || DEFAULT_CONFIG.portalUrl,
+  driveSopUrl: rawConfig.driveSopUrl?.trim() || DEFAULT_CONFIG.driveSopUrl,
+  githubToken: (rawConfig as any).githubToken?.trim() || process.env.NEXT_PUBLIC_GITHUB_TOKEN || process.env.GITHUB_TOKEN || DEFAULT_CONFIG.githubToken,
 };

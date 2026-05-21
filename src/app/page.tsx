@@ -1,5 +1,6 @@
 import React from 'react';
 import { Navbar } from '@/components/Navbar';
+import { ProjectDocuments } from '@/components/ProjectDocuments';
 import { appConfig } from '@/config';
 
 export default function Home() {
@@ -233,6 +234,9 @@ export default function Home() {
             )}
           </div>
         </section>
+
+        {/* Dynamic Project Documents & SOP Section */}
+        <ProjectDocuments />
       </main>
 
       {/* Footer */}
