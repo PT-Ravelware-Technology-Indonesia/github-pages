@@ -1,5 +1,13 @@
 import rawConfig from '../../config.json';
 
+export interface SopItem {
+  id: string;
+  name: string;
+  description: string;
+  url: string;
+  category: string;
+}
+
 export interface AppConfig {
   githubOwner: string;
   repoName: string;
@@ -8,7 +16,7 @@ export interface AppConfig {
   projectUrl: string;
   kumaUrl: string;
   portalUrl: string;
-  driveSopUrl: string;
+  sops: SopItem[];
   githubToken: string;
 }
 
@@ -20,7 +28,15 @@ const DEFAULT_CONFIG: AppConfig = {
   projectUrl: '',
   kumaUrl: 'https://kuma.ravelware.cloud',
   portalUrl: 'https://PT-Ravelware-Technology-Indonesia.github.io/github-pages/',
-  driveSopUrl: 'https://drive.google.com/drive/folders/1NuEWMGEEsTCbarTOqAXuZUe1ZWGxRJXz',
+  sops: [
+    {
+      id: "sop-1",
+      name: "SOP Google Drive Ravelware",
+      description: "Dokumen standar operasional prosedur untuk tim di dalam folder Google Drive terpusat.",
+      url: "https://drive.google.com/drive/folders/1NuEWMGEEsTCbarTOqAXuZUe1ZWGxRJXz",
+      category: "Drive Folder"
+    }
+  ],
   githubToken: '',
 };
 
@@ -34,6 +50,6 @@ export const appConfig: AppConfig = {
   projectUrl: rawConfig.projectUrl?.trim() || DEFAULT_CONFIG.projectUrl,
   kumaUrl: rawConfig.kumaUrl?.trim() || DEFAULT_CONFIG.kumaUrl,
   portalUrl: rawConfig.portalUrl?.trim() || DEFAULT_CONFIG.portalUrl,
-  driveSopUrl: rawConfig.driveSopUrl?.trim() || DEFAULT_CONFIG.driveSopUrl,
-  githubToken: (rawConfig as any).githubToken?.trim() || process.env.NEXT_PUBLIC_GITHUB_TOKEN || process.env.GITHUB_TOKEN || DEFAULT_CONFIG.githubToken,
+  sops: rawConfig.sops || DEFAULT_CONFIG.sops,
+  githubToken: process.env.NEXT_PUBLIC_GITHUB_TOKEN || rawConfig.githubToken?.trim() || DEFAULT_CONFIG.githubToken,
 };

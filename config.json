@@ -6,6 +6,14 @@
   "projectUrl": "",
   "kumaUrl": "https://kuma.ravelware.cloud",
   "portalUrl": "https://github.com/PT-Ravelware-Technology-Indonesia/github-pages/",
-  "driveSopUrl": "https://drive.google.com/drive/folders/1NuEWMGEEsTCbarTOqAXuZUe1ZWGxRJXz",
+  "sops": [
+    {
+      "id": "sop-1",
+      "name": "SOP Google Drive Ravelware",
+      "description": "Dokumen standar operasional prosedur untuk tim di dalam folder Google Drive terpusat.",
+      "url": "https://drive.google.com/drive/folders/1NuEWMGEEsTCbarTOqAXuZUe1ZWGxRJXz",
+      "category": "Drive Folder"
+    }
+  ],
   "githubToken": ""
 }

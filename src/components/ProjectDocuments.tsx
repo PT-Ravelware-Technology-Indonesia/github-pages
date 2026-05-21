@@ -208,18 +208,7 @@ export const ProjectDocuments: React.FC = () => {
     }
   };
 
-  // Helper to extract Google Drive Folder ID from URL
-  const extractDriveId = (url: string) => {
-    if (!url) return '';
-    // Matches patterns like:
-    // https://drive.google.com/drive/folders/1NuEWMGEEsTCbarTOqAXuZUe1ZWGxRJXz
-    // or https://drive.google.com/drive/u/0/folders/1NuEWMGEEsTCbarTOqAXuZUe1ZWGxRJXz
-    // or id=1NuEWMGEEsTCbarTOqAXuZUe1ZWGxRJXz
-    const match = url.match(/\/folders\/([a-zA-Z0-9-_]+)/) || url.match(/[?&]id=([a-zA-Z0-9-_]+)/);
-    return match ? match[1] : url;
-  };
 
-  const driveId = extractDriveId(appConfig.driveSopUrl);
 
   return (
     <>
@@ -512,65 +501,54 @@ export const ProjectDocuments: React.FC = () => {
 
       {activeTab === 'drive' && (
         <div className="tab-pane-content">
-          <div className="drive-sop-container">
-            <div className="drive-sop-header">
-              <p className="drive-description">
-                Menampilkan folder dokumen Standar Operasional Prosedur (SOP) resmi langsung dari Google Drive. 
-                Anda juga dapat membuka folder penuh untuk mengunggah atau mengatur file.
-              </p>
-              <a
-                href={appConfig.driveSopUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="primary-btn drive-open-btn"
-                id="btn-open-drive"
-              >
-                <span>Buka di Google Drive</span>
-                <svg
-                  viewBox="0 0 24 24"
-                  width="18"
-                  height="18"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  fill="none"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="drive-btn-icon"
-                >
-                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3" />
-                </svg>
-              </a>
-            </div>
+          <div className="repos-container">
+            <div className="repos-grid">
+              {appConfig.sops.map((sop) => (
+                <article key={sop.id} className="repo-card">
+                  <div className="repo-header">
+                    <div className="repo-title-wrapper">
+                      <svg className="repo-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                      </svg>
+                      <h3 className="repo-name">{sop.name}</h3>
+                    </div>
+                  </div>
 
-            {driveId ? (
-              <div className="drive-iframe-wrapper">
-                {/* Fallback spinner inside the iframe wrapper */}
-                <div className="drive-iframe-loading">
-                  <div className="drive-spinner"></div>
-                  <p>Memuat Google Drive...</p>
-                </div>
-                <iframe
-                  src={`https://drive.google.com/embeddedfolderview?id=${driveId}#list`}
-                  width="100%"
-                  height="650"
-                  frameBorder="0"
-                  allowFullScreen
-                  title="Google Drive SOP Embedded Viewer"
-                  className="drive-iframe"
-                  style={{ backgroundColor: 'white', colorScheme: 'light' }}
-                ></iframe>
-              </div>
-            ) : (
-              <div className="error-box">
-                <div className="error-icon-wrapper">
-                  <svg viewBox="0 0 24 24" width="32" height="32" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="12" r="10" />
-                    <line x1="12" y1="8" x2="12" y2="12" />
-                    <line x1="12" y1="16" x2="12.01" y2="16" />
-                  </svg>
-                </div>
-                <h4>Folder Tidak Terkonfigurasi</h4>
-                <p>Silakan periksa konfigurasi driveSopUrl di file config.json Anda.</p>
+                  <p className="repo-description">
+                    {sop.description || 'Tidak ada deskripsi.'}
+                  </p>
+
+                  <div className="repo-meta">
+                    <span className="repo-language">
+                      <span className="lang-color" style={{ backgroundColor: '#00ADD8' }}></span>
+                      {sop.category}
+                    </span>
+                  </div>
+
+                  <div className="repo-actions">
+                    <a
+                      href={sop.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="repo-action-btn github-link"
+                    >
+                      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3" />
+                      </svg>
+                      <span>Buka Dokumen</span>
+                    </a>
+                  </div>
+                </article>
+              ))}
+            </div>
+            
+            {appConfig.sops.length === 0 && (
+              <div className="empty-state">
+                <svg viewBox="0 0 24 24" width="48" height="48" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                </svg>
+                <h3>Belum ada SOP</h3>
+                <p>Silakan tambahkan dokumen SOP di file config.json.</p>
               </div>
             )}
           </div>
