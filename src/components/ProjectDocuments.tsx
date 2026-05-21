@@ -50,6 +50,29 @@ export const ProjectDocuments: React.FC = () => {
   const [readmeLoading, setReadmeLoading] = useState(false);
   const [readmeError, setReadmeError] = useState<string | null>(null);
 
+  // SOP Modal States
+  const [selectedSop, setSelectedSop] = useState<any | null>(null);
+
+  // Helper to extract Google Drive Embed URL
+  const getDriveEmbedUrl = (url: string) => {
+    if (!url) return '';
+    
+    // Check if it's a folder
+    const folderMatch = url.match(/\/folders\/([a-zA-Z0-9-_]+)/) || url.match(/[?&]id=([a-zA-Z0-9-_]+)/);
+    if (folderMatch) {
+      return `https://drive.google.com/embeddedfolderview?id=${folderMatch[1]}#list`;
+    }
+
+    // Check if it's a Google Doc/Sheet/Slide
+    const fileMatch = url.match(/\/d\/([a-zA-Z0-9-_]+)/);
+    if (fileMatch) {
+      return `https://docs.google.com/document/d/${fileMatch[1]}/preview`;
+    }
+
+    // Fallback: just return original URL (might not embed well depending on X-Frame-Options)
+    return url;
+  };
+
   // Fetch individual README content rendered as HTML
   const handleOpenReadme = async (repoName: string) => {
     setReadmeRepo(repoName);
@@ -526,17 +549,15 @@ export const ProjectDocuments: React.FC = () => {
                   </div>
 
                   <div className="repo-actions">
-                    <a
-                      href={sop.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                    <button
+                      onClick={() => setSelectedSop(sop)}
                       className="repo-action-btn github-link"
                     >
                       <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3" />
+                        <path d="M15 3h6v6M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h6l2 3h9a2 2 0 0 1 2 2v3M10 14l11-11" />
                       </svg>
                       <span>Buka Dokumen</span>
-                    </a>
+                    </button>
                   </div>
                 </article>
               ))}
@@ -615,6 +636,62 @@ export const ProjectDocuments: React.FC = () => {
                 <span>Buka di GitHub</span>
               </a>
               <button className="primary-btn readme-close-btn" onClick={handleCloseReadme}>
+                Tutup
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* SOP Modal rendered via Portal */}
+      {selectedSop && typeof document !== 'undefined' && ReactDOM.createPortal(
+        <div className="readme-modal-overlay" onClick={() => setSelectedSop(null)} role="dialog" aria-modal="true">
+          <div className="readme-modal-container" onClick={(e) => e.stopPropagation()} style={{ height: '85vh', maxHeight: '900px' }}>
+            <div className="readme-modal-header">
+              <div className="readme-modal-title-group">
+                <svg className="readme-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                </svg>
+                <h3>{selectedSop.name}</h3>
+              </div>
+              <button className="readme-modal-close" onClick={() => setSelectedSop(null)} aria-label="Tutup modal">
+                &times;
+              </button>
+            </div>
+
+            <div className="readme-modal-content" style={{ padding: 0, overflow: 'hidden' }}>
+              <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+                <div className="drive-loading-overlay" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-card)', zIndex: 1 }}>
+                  <div className="drive-spinner"></div>
+                  <p style={{ marginTop: '1rem', color: 'var(--text-secondary)' }}>Memuat Dokumen Google...</p>
+                </div>
+                <iframe
+                  src={getDriveEmbedUrl(selectedSop.url)}
+                  width="100%"
+                  height="100%"
+                  frameBorder="0"
+                  allowFullScreen
+                  title="Google Drive SOP Viewer"
+                  style={{ position: 'relative', zIndex: 2, backgroundColor: 'white', colorScheme: 'light' }}
+                  onLoad={(e) => {
+                    const overlay = e.currentTarget.previousElementSibling as HTMLElement;
+                    if (overlay) overlay.style.display = 'none';
+                  }}
+                ></iframe>
+              </div>
+            </div>
+
+            <div className="readme-modal-footer">
+              <a
+                href={selectedSop.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="repo-action-btn github-link readme-view-github-btn"
+              >
+                <span>Buka di Tab Baru</span>
+              </a>
+              <button className="primary-btn readme-close-btn" onClick={() => setSelectedSop(null)}>
                 Tutup
               </button>
             </div>
