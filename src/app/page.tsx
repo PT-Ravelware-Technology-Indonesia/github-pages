@@ -38,8 +38,42 @@ async function fetchRepositories(): Promise<Repository[]> {
   }
 }
 
+// Fetch READMEs for all repositories at build-time
+async function fetchReadmes(repos: Repository[]): Promise<Record<string, string>> {
+  const readmes: Record<string, string> = {};
+  
+  const headers: Record<string, string> = {
+    Accept: 'application/vnd.github.v3.html',
+  };
+
+  if (appConfig.githubToken) {
+    headers['Authorization'] = `token ${appConfig.githubToken}`;
+  }
+
+  // Fetch all readmes in parallel
+  await Promise.all(
+    repos.map(async (repo) => {
+      try {
+        const response = await fetch(
+          `https://api.github.com/repos/${appConfig.githubOwner}/${repo.name}/readme`,
+          { headers }
+        );
+        if (response.ok) {
+          const html = await response.text();
+          readmes[repo.name] = html;
+        }
+      } catch (err) {
+        console.error(`Failed to fetch readme for ${repo.name}`);
+      }
+    })
+  );
+
+  return readmes;
+}
+
 export default async function Home() {
   const initialRepos = await fetchRepositories();
+  const initialReadmes = await fetchReadmes(initialRepos);
 
   const githubRepoUrl = `https://github.com/${appConfig.githubOwner}/${appConfig.repoName}`;
   const githubProfileUrl = `https://github.com/${appConfig.githubOwner}`;
@@ -273,7 +307,7 @@ export default async function Home() {
         </section>
 
         {/* Project & Documentation Section */}
-        <ProjectDocuments initialRepos={initialRepos} />
+        <ProjectDocuments initialRepos={initialRepos} initialReadmes={initialReadmes} />
       </main>
 
       {/* Footer */}

@@ -37,9 +37,10 @@ const LANGUAGE_COLORS: Record<string, string> = {
 
 interface ProjectDocumentsProps {
   initialRepos: Repository[];
+  initialReadmes: Record<string, string>;
 }
 
-export const ProjectDocuments: React.FC<ProjectDocumentsProps> = ({ initialRepos }) => {
+export const ProjectDocuments: React.FC<ProjectDocumentsProps> = ({ initialRepos, initialReadmes }) => {
   const [activeTab, setActiveTab] = useState<'github' | 'drive'>('github');
   const [repos, setRepos] = useState<Repository[]>(initialRepos);
   const [loading, setLoading] = useState(false);
@@ -54,38 +55,21 @@ export const ProjectDocuments: React.FC<ProjectDocumentsProps> = ({ initialRepos
   const [readmeLoading, setReadmeLoading] = useState(false);
   const [readmeError, setReadmeError] = useState<string | null>(null);
 
-  // Fetch individual README content rendered as HTML
-  const handleOpenReadme = async (repoName: string) => {
+  // Show README from pre-fetched initialReadmes
+  const handleOpenReadme = (repoName: string) => {
     setReadmeRepo(repoName);
     setReadmeLoading(true);
     setReadmeHtml(null);
     setReadmeError(null);
 
-    try {
-      const headers: Record<string, string> = {
-        Accept: 'application/vnd.github.v3.html',
-      };
-
-      const response = await fetch(
-        `https://api.github.com/repos/${appConfig.githubOwner}/${repoName}/readme`,
-        { headers }
-      );
-
-      if (!response.ok) {
-        if (response.status === 404) {
-          throw new Error('Dokumentasi README.md tidak ditemukan untuk repository ini.');
-        }
-        throw new Error(`Gagal memuat README: Status ${response.status}`);
-      }
-
-      const html = await response.text();
+    const html = initialReadmes[repoName];
+    if (html) {
       setReadmeHtml(html);
-    } catch (err: any) {
-      console.error(err);
-      setReadmeError(err.message || 'Terjadi kesalahan saat mengambil dokumen README.');
-    } finally {
-      setReadmeLoading(false);
+    } else {
+      setReadmeError('Dokumentasi README.md tidak ditemukan untuk repository ini.');
     }
+    
+    setReadmeLoading(false);
   };
 
   const handleCloseReadme = () => {
